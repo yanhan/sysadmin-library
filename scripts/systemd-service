@@ -1,0 +1,51 @@
+#!/bin/bash
+
+set -euo pipefail
+IFS=$'\n\t'
+
+main() {
+	local uninstall=false
+	if [ "${#}" -gt 0 ] && [ "${1}" = "-u" ]; then
+		uninstall=true
+	fi
+
+	set +u
+	eval "$(pyenv init -)"
+	eval "$(pyenv virtualenv-init -)"
+	set -u
+
+	pyenv versions
+	declare -r ansible_version=2.8.5
+	declare -r python_version=3.7.4
+	declare -r virtualenv_name=ansible28
+	if ! pyenv versions | grep "${virtualenv_name}" >/dev/null; then
+		set +u
+		pyenv virtualenv "${python_version}"  "${virtualenv_name}"
+		pyenv activate "${virtualenv_name}"
+		pip install ansible=="${ansible_version}"
+		pyenv deactivate
+		set -u
+	fi
+
+	set +u
+	pyenv activate "${virtualenv_name}"
+	set -u
+
+	local tags=""
+	if [ "${uninstall}" = "true" ]; then
+		tags=( -t uninstall )
+	else
+		tags=( -t install )
+	fi
+	ansible-playbook \
+		-K \
+		"${tags[@]}" \
+		ansible/install-systemd-service.yml
+
+	set +u
+	pyenv deactivate
+	set -u
+}
+
+main "$@"
+# vim:noet

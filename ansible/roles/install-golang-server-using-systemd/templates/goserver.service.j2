@@ -1,0 +1,12 @@
+[Unit]
+Description=A Hello World Golang web server
+
+[Service]
+Type=simple
+ExecStart="{{ golang_server_path }}"
+ExecStop=/bin/kill -s TERM $MAINPID
+User=nobody
+Group=nogroup
+
+[Install]
+WantedBy=multi-user.target

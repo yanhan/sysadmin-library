@@ -1,0 +1,5 @@
+service_name: goserver
+systemd_service_file_name: "{{ service_name }}.service"
+systemd_service_file_path: "/lib/systemd/system/{{ systemd_service_file_name }}"
+golang_server_name: helloworld-server
+golang_server_path: /usr/local/bin/helloworld-server

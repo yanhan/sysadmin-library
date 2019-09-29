@@ -1,0 +1,75 @@
+- name: Create temporary directory in $HOME/go/src
+  tempfile:
+    state: directory
+    path: "{{ ansible_env.HOME }}/go/src"
+    prefix: ansibleInstallSystemdService
+  register: gosrc_tempdir
+  tags:
+    - install
+
+- name: Copy source code of hello world Golang server to tempdir
+  copy:
+    src: main.go
+    dest: "{{ gosrc_tempdir.path }}/main.go"
+  tags:
+    - install
+
+- name: Compile hello world Golang server
+  shell: CGO_ENABLED=0 go build -o "{{ golang_server_name }}"
+  args:
+    chdir: "{{ gosrc_tempdir.path }}"
+  tags:
+    - install
+
+- name: Install helloworld Golang server
+  shell: mv "{{ golang_server_name }}"  "{{ golang_server_path }}"
+  args:
+    chdir: "{{ gosrc_tempdir.path }}"
+  become: yes
+  tags:
+    - install
+
+- name: Delete temporary directory in $HOME/go/src
+  file:
+    path: "{{ gosrc_tempdir.path }}"
+    state: absent
+  tags:
+    - install
+
+- name: Install systemd file
+  template:
+    src: "{{ systemd_service_file_name }}.j2"
+    dest: "{{ systemd_service_file_path }}"
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  register: install_systemd_file
+  tags:
+    - install
+
+- name: systemctl daemon-reload
+  command: systemctl daemon-reload
+  become: yes
+  when: install_systemd_file.changed
+  tags:
+    - install
+
+- name: Enable service on system boot
+  service:
+    name: "{{ service_name }}"
+    enabled: yes
+  become: yes
+  tags:
+    - install
+
+- name: Start service
+  service:
+    name: "{{ service_name }}"
+    state: started
+  become: yes
+  tags:
+    - install
+
+- name: Include uninstall file
+  include: uninstall.yml

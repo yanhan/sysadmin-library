@@ -1,0 +1,39 @@
+- name: Stop the service
+  service:
+    name: "{{ service_name }}"
+    state: stopped
+  become: yes
+  tags:
+    - uninstall
+
+- name: Disable the service
+  service:
+    name: "{{ service_name }}"
+    enabled: no
+  become: yes
+  tags:
+    - uninstall
+
+- name: Remove the service file
+  file:
+    path: "{{ systemd_service_file_path }}"
+    state: absent
+  become: yes
+  register: remove_systemd_service_file
+  tags:
+    - uninstall
+
+- name: systemctl daemon-reload
+  command: systemctl daemon-reload
+  become: yes
+  when: remove_systemd_service_file.changed
+  tags:
+    - uninstall
+
+- name: Remove the helloworld Golang server
+  file:
+    path: "{{ golang_server_path }}"
+    state: absent
+  become: yes
+  tags:
+    - uninstall
