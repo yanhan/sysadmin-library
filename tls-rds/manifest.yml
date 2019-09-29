@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tls-rds
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tls-rds
+  template:
+    metadata:
+      labels:
+        app: tls-rds
+    spec:
+      containers:
+        - name: tls-rds
+          image: yanhan/golang-tls-rds:0.1
+          ports:
+            - name: http
+              containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /health-check
+              port: http
+            successThreshold: 1
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health-check
+              port: http
+            successThreshold: 2
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          env:
+            - name: RDS_TLS_CA_CERT_PATH
+              value: /etc/ssl/certs/rds-combined-ca-bundle.pem
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: tls-rds
+                  key: DB_HOST
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: tls-rds
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: tls-rds
+                  key: DB_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tls-rds
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    app: tls-rds
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
