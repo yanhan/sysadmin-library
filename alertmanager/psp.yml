@@ -1,0 +1,66 @@
+apiVersion: extensions/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: alertmanager
+spec:
+  allowPrivilegeEscalation: false
+  allowedCapabilities: []
+  defaultAllowPrivilegeEscalation: false
+  fsGroup:
+    ranges:
+      - min: 1
+        max: 65535
+    rule: MustRunAs
+  hostIPC: false
+  hostNetwork: false
+  hostPID: false
+  privileged: false
+  requiredDropCapabilities:
+    - all
+  runAsGroup:
+    ranges:
+      - min: 1
+        max: 65535
+    rule: MustRunAs
+  runAsUser:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    ranges:
+      - min: 1
+        max: 65535
+    rule: MustRunAs
+  volumes:
+    - configMap
+    - downwardAPI
+    - emptyDir
+    - persistentVolumeClaim
+    - projected
+    - secret
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: alertmanager-use-own-psp
+  namespace: prometheus
+rules:
+  - apiGroups: ["extensions"]
+    resources: ["podsecuritypolicies"]
+    resourceNames: ["alertmanager"]
+    verbs: ["use"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: alertmanager-use-own-psp
+  namespace: prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: alertmanager-use-own-psp
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: alertmanager
+    namespace: prometheus

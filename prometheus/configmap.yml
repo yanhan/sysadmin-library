@@ -10,6 +10,34 @@ data:
         rules:
           - record: job_service:rpc_durations_seconds_count:avg_rate5m
             expr: avg(rate(rpc_durations_seconds_count[6m])) by (job, service)
+      - name: dms
+        rules:
+        - alert: DeadMansSwitch
+          annotations:
+            description: This is a DeadMansSwitch meant to ensure that the entire Alerting
+              pipeline is functional.
+            summary: Alerting DeadMansSwitch
+          expr: vector(1)
+          labels:
+            severity: none
+      - name: CPU high on node
+        rules:
+          - alert: X CPU high on node X
+            annotations:
+              description: Damn it
+            expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{job="node_exporter",mode="idle"}[1m])) * 100) > 40
+            for: 5m
+            labels:
+              severity: high
+      #- name: Capacity issues
+        #rules:
+          #- alert: Unschedulable Pods
+            #annotations:
+              #description: Some pods could not be scheduled, most likely due to capacity concerns.
+              #summary: Unschedulable Pods.
+            #expr: avg_over_time(kube_pod_status_scheduled{condition="false"}[5m]) == 1
+            #labels:
+              #severity: high
 
   prometheus.yml: |
     global:
@@ -21,6 +49,13 @@ data:
 
     rule_files:
       - "prometheus.rules.yml"
+
+    alerting:
+      alertmanagers:
+      - scheme: http
+        static_configs:
+        - targets:
+           - "alertmanager:9093"
 
     scrape_configs:
       # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
