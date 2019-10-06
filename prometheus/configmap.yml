@@ -40,6 +40,16 @@ data:
             labels:
               severity: high
 
+      - name: Disk space low on node
+        rules:
+          - alert: Disk space low on node
+            annotations:
+              description: Another description
+            expr: sum by (instance) (avg_over_time(node_filesystem_avail_bytes{mountpoint="/"}[5m]) / avg_over_time(node_filesystem_size_bytes{mountpoint="/"}[5m])) * 100 < 50
+            for: 1m
+            labels:
+              severity: high
+
       #- name: Capacity issues
         #rules:
           #- alert: Unschedulable Pods
