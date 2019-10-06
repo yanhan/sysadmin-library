@@ -29,6 +29,17 @@ data:
             for: 5m
             labels:
               severity: high
+
+      - name: Memory usage high on node
+        rules:
+          - alert: Memory usage high on node
+            annotations:
+              description: Another description
+            expr: sum by (instance) (1 - avg_over_time(node_memory_MemAvailable_bytes{job="node_exporter"}[5m]) / avg_over_time(node_memory_MemTotal_bytes{job="node_exporter"}[5m])) * 100 > 80
+            for: 1m
+            labels:
+              severity: high
+
       #- name: Capacity issues
         #rules:
           #- alert: Unschedulable Pods
