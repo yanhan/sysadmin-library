@@ -1,0 +1,13 @@
+- name: Install /etc/apt/apt.conf.d/10periodic
+  copy:
+    src: 10periodic
+    dest: /etc/apt/apt.conf.d/10periodic
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+
+- name: Install unattended-upgrades
+  apt:
+    name: unattended-upgrades
+  become: yes

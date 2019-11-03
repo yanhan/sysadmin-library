@@ -1,0 +1,7 @@
+---
+- name: Enable unattended-upgrades
+  hosts: all
+  gather_facts: yes
+  connection: ssh
+  roles:
+    - unattended-upgrades
