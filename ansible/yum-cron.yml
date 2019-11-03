@@ -1,0 +1,7 @@
+---
+- name: Enable yum-cron
+  hosts: all
+  gather_facts: yes
+  connection: ssh
+  roles:
+    - yum-cron

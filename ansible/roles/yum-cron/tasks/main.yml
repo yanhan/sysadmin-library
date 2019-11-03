@@ -1,0 +1,30 @@
+- name: Check if we are on Amazon Linux 2
+  shell: grep -q -i 'Amazon Linux release 2' /etc/system-release
+  register: check_if_amazon_linux
+  ignore_errors: true
+  changed_when: false
+
+- name: Check if EPEL is enabled
+  shell: yum info epel-release
+  register: check_if_epel_enabled
+  become: yes
+  when: check_if_amazon_linux.rc == 0
+  changed_when: false
+
+- name: Enable EPEL on Amazon Linux 2
+  shell: yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  become: yes
+  when: check_if_amazon_linux.rc == 0 and check_if_epel_enabled.rc != 0
+
+- name: Install yum-cron
+  yum:
+    name: yum-cron
+    state: present
+  become: yes
+
+- name: Start yum-cron
+  service:
+    name: yum-cron
+    state: started
+    enabled: yes
+  become: yes
