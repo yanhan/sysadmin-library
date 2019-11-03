@@ -1,0 +1,18 @@
+# NOTE: Run the following commands to get manpages for relevant sections
+# in this file:
+#
+#     man systemd.unit
+#     man systemd.service
+
+[Unit]
+Description=Prometheus Node Exporter
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/node_exporter
+ExecStop=/bin/kill -s TERM $MAINPID
+User=nobody
+Group=nogroup
+
+[Install]
+WantedBy=multi-user.target

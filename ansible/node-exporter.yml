@@ -1,0 +1,7 @@
+---
+- name: Install Prometheus node exporter
+  hosts: all
+  gather_facts: yes
+  connection: ssh
+  roles:
+    - node-exporter

@@ -1,0 +1,6 @@
+node_exporter_release_name: "node_exporter-0.18.1.linux-amd64"
+node_exporter_archive_name: "{{ node_exporter_release_name }}.tar.gz"
+
+node_exporter:
+  url: "https://github.com/prometheus/node_exporter/releases/download/v0.18.1/{{ node_exporter_archive_name }}"
+  sha256sum: "b2503fd932f85f4e5baf161268854bf5d22001869b84f00fd2d1f57b51b72424"

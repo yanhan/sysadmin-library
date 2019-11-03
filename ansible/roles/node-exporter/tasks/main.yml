@@ -1,0 +1,65 @@
+- name: Check if Prometheus node exporter is installed
+  shell: command -v node_exporter >/dev/null 2>&1
+  register: check_if_prometheus_node_exporter_installed
+  ignore_errors: true
+  changed_when: false
+
+- name: Create temporary directory
+  tempfile:
+    prefix: "{{ ansible_env.HOME }}/node-exporter"
+    state: directory
+  register: temp_dir
+  when: check_if_prometheus_node_exporter_installed.rc != 0
+
+- name: Download Prometheus node exporter
+  get_url:
+    url: "{{ node_exporter.url }}"
+    dest: "{{ temp_dir.path }}/{{ node_exporter_archive_name }}"
+    sha256sum: "{{ node_exporter.sha256sum }}"
+  when: check_if_prometheus_node_exporter_installed.rc != 0
+
+- name: Extract Prometheus node exporter
+  unarchive:
+    src: "{{ temp_dir.path }}/{{ node_exporter_archive_name }}"
+    remote_src: yes
+    dest: "{{ temp_dir.path }}"
+  when: check_if_prometheus_node_exporter_installed.rc != 0
+
+- name: Install Prometheus node exporter
+  copy:
+    src: "{{ temp_dir.path }}/{{ node_exporter_release_name }}/node_exporter"
+    remote_src: yes
+    dest: /usr/local/bin/node_exporter
+    owner: root
+    group: root
+    mode: 0755
+  become: yes
+  when: check_if_prometheus_node_exporter_installed.rc != 0
+
+- name: Remove temporary directory
+  file:
+    path: "{{ temp_dir.path }}"
+    state: absent
+  when: check_if_prometheus_node_exporter_installed.rc != 0
+
+- name: Install systemd file
+  copy:
+    src: node_exporter.service
+    dest: /lib/systemd/system/node_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+  register: install_sytemd_file
+  become: yes
+
+- name: systemctl daemon-reload
+  command: systemctl daemon-reload
+  become: yes
+  when: install_sytemd_file.changed
+
+- name: Start node_exporter service
+  service:
+    name: node_exporter
+    enabled: yes
+    state: started
+  become: yes
