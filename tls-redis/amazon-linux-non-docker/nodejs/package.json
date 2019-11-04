@@ -1,0 +1,14 @@
+{
+  "name": "tls-redis",
+  "version": "1.0.0",
+  "description": "Connect to AWS Elasticache Redis over TLS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Pang Yan Han",
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "redis": "^2.8.0"
+  }
+}
