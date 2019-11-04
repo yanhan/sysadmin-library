@@ -1,0 +1,38 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "kms:Encrypt",
+                "kms:Decrypt"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:kms:REPLACE_WITH_AWS_REGION:REPLACE_WITH_AWS_ACCOUNT:key/REPLACE_WITH_KMS_KEY_ID"
+            ]
+        },
+        {
+            "Action": [
+                "kms:ListAliases",
+                "ssm:DescribeParameters"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "*"
+            ]
+        },
+        {
+            "Action": [
+                "ssm:DeleteParameter",
+                "ssm:DeleteParameters",
+                "ssm:GetParameter",
+                "ssm:GetParameters",
+                "ssm:PutParameter"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:ssm:REPLACE_WITH_AWS_REGION:REPLACE_WITH_AWS_ACCOUNT:parameter/PATH/TO/PARAMETER/*"
+            ]
+        }
+    ]
+}
