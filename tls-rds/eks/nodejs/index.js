@@ -13,7 +13,9 @@ const conn = mysql.createConnection({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  ssl: "Amazon RDS"
+  ssl: {
+    ca: fs.readFileSync(process.env.RDS_TLS_CA_CERT_PATH),
+  },
 });
 
 const connQuery = promisify(conn.query).bind(conn);
