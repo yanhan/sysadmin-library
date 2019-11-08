@@ -1,0 +1,14 @@
+{
+  "name": "tls-rds-mysql",
+  "version": "1.0.0",
+  "description": "Connect to AWS RDS MySQL over TLS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Pang Yan Han",
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "mysql": "^2.17.1"
+  }
+}
