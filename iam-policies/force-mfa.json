@@ -1,0 +1,102 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "iam:GetAccountPasswordPolicy"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "*"
+            ]
+        },
+        {
+            "Action": [
+                "iam:ChangePassword",
+                "iam:CreateLoginProfile",
+                "iam:EnableMFADevice",
+                "iam:GetLoginProfile",
+                "iam:GetUser",
+                "iam:ListMFADevices",
+                "iam:UpdateLoginProfile"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:iam::REPLACE_WITH_AWS_ACCOUNT_ID:user/${aws:username}"
+            ]
+        },
+        {
+            "Action": [
+                "iam:CreateVirtualMFADevice"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:iam::REPLACE_WITH_AWS_ACCOUNT_ID:mfa/${aws:username}"
+            ]
+        },
+        {
+            "Sid": "DenyMfaDeactivationIfNotLoggedInWithMfa",
+            "Action": [
+                "iam:DeactivateMFADevice",
+                "iam:DeleteLoginProfile",
+                "iam:DeleteVirtualMFADevice",
+                "iam:ResyncMFADevice"
+            ],
+            "Effect": "Deny",
+            "Resource": [
+                "*"
+            ],
+            "Condition": {
+                "BoolIfExists": {
+                    "aws:MultiFactorAuthPresent": "false"
+                }
+            }
+        },
+        {
+            "Sid": "OnlyAllowTheseActionsIfNotLoggedInWithMfa",
+            "NotAction": [
+                "iam:GetAccountPasswordPolicy",
+                "iam:ChangePassword",
+                "iam:CreateLoginProfile",
+                "iam:EnableMFADevice",
+                "iam:GetLoginProfile",
+                "iam:GetUser",
+                "iam:ListMFADevices",
+                "iam:UpdateLoginProfile",
+                "iam:CreateVirtualMFADevice"
+            ],
+            "Effect": "Deny",
+            "Resource": [
+                "*"
+            ],
+            "Condition": {
+                "BoolIfExists": {
+                    "aws:MultiFactorAuthPresent": "false"
+                }
+            }
+        },
+        {
+            "Sid": "OnlyAllowTheseActionsForOwnUserIfNotLoggedInWithMfa",
+            "Action": [
+                "iam:ChangePassword",
+                "iam:CreateLoginProfile",
+                "iam:EnableMFADevice",
+                "iam:GetLoginProfile",
+                "iam:GetUser",
+                "iam:ListMFADevices",
+                "iam:UpdateLoginProfile",
+                "iam:CreateVirtualMFADevice"
+            ],
+            "Effect": "Deny",
+            "NotResource": [
+                "arn:aws:iam::REPLACE_WITH_AWS_ACCOUNT_ID:user/${aws:username}",
+                "arn:aws:iam::REPLACE_WITH_AWS_ACCOUNT_ID:mfa/${aws:username}"
+            ],
+            "Condition": {
+                "BoolIfExists": {
+                    "aws:MultiFactorAuthPresent": "false"
+                }
+            }
+        }
+    ]
+}
