@@ -31,7 +31,7 @@ Take note of the name of the IAM role. We will assume it is named `cw-logs-to-fi
 The IAM role should have the following:
 
 - The trust policy in `sts-cloudwatch-logs-to-firehose.json`, replacing the placeholder for the AWS region.
-- The IAM policy in `cloudwatch-logs-to-firehose.json`, replacing the placeholders for AWS region, AWS account id and IAM role name (which we assume is called `cw-logs-to-firehose`).
+- The IAM policy in `cloudwatch-logs-to-firehose.json`, replacing the placeholders for Kinesis Firehose delivery stream ARN and IAM role ARN (for the IAM role name we assume is called `cw-logs-to-firehose`).
 
 
 ## CloudWatch Logs subscription filter

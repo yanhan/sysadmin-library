@@ -4,10 +4,11 @@
         {
             "Effect": "Allow",
             "Action": [
-                "firehose:*"
+                "firehose:PutRecord",
+                "firehose:PutRecordBatch"
             ],
             "Resource": [
-                "arn:aws:firehose:REPLACE_WITH_AWS_REGION:REPLACE_WITH_AWS_ACCOUNT_ID:*"
+                "REPLACE_WITH_KINESIS_FIREHOSE_DELIVERY_STREAM_ARN"
             ]
         },
         {
