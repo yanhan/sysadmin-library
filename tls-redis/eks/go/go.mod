@@ -1,4 +1,4 @@
-module github.com/yanhan/devops-library/tls-redis/eks/go
+module github.com/yanhan/sysadmin-library/tls-redis/eks/go
 
 go 1.13
 

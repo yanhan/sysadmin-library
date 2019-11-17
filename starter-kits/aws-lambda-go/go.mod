@@ -1,4 +1,4 @@
-module github.com/yanhan/devops-library/starter-kits/aws-lambda-go
+module github.com/yanhan/sysadmin-library/starter-kits/aws-lambda-go
 
 go 1.13
 

@@ -1,7 +1,7 @@
 FROM golang:1.13.2-buster AS builder
 WORKDIR /go/src/tls-redis
 COPY main.go /go/src/tls-redis/main.go
-RUN go mod init github.com/yanhan/devops-library/tls-redis/eks
+RUN go mod init github.com/yanhan/sysadmin-library/tls-redis/eks
 RUN CGO_ENABLED=0  GOOS=linux  GOARCH=amd64  go build -o main
 
 FROM alpine:3.10.2

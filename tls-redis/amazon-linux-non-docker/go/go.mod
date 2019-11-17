@@ -1,4 +1,4 @@
-module github.com/yanhan/devops-library/tls-redis/amazon-linux-non-docker/go
+module github.com/yanhan/sysadmin-library/tls-redis/amazon-linux-non-docker/go
 
 go 1.13
 

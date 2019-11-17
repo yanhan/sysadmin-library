@@ -1,4 +1,4 @@
-module github.com/devops-library/tls-rds/ec2/go
+module github.com/sysadmin-library/tls-rds/ec2/go
 
 go 1.13
 

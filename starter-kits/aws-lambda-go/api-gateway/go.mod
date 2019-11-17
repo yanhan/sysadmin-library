@@ -1,4 +1,4 @@
-module github.com/code/devops-library/starter-kits/aws-lambda-go/api-gateway
+module github.com/code/sysadmin-library/starter-kits/aws-lambda-go/api-gateway
 
 go 1.13
 
