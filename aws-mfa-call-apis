@@ -26,6 +26,7 @@ IFS=$'\n\t'
 # References
 # ==========
 # https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html
+# https://aws.amazon.com/premiumsupport/knowledge-center/authenticate-mfa-cli/
 
 main() {
 	local temp_credentials_with_mfa
