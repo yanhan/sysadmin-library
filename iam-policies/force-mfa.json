@@ -3,7 +3,8 @@
     "Statement": [
         {
             "Action": [
-                "iam:GetAccountPasswordPolicy"
+                "iam:GetAccountPasswordPolicy",
+                "sts:GetSessionToken"
             ],
             "Effect": "Allow",
             "Resource": [
@@ -63,7 +64,8 @@
                 "iam:GetUser",
                 "iam:ListMFADevices",
                 "iam:UpdateLoginProfile",
-                "iam:CreateVirtualMFADevice"
+                "iam:CreateVirtualMFADevice",
+                "sts:GetSessionToken"
             ],
             "Effect": "Deny",
             "Resource": [

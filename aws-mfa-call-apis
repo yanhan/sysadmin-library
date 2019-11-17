@@ -1,0 +1,52 @@
+#!/bin/bash
+
+set -euo pipefail
+IFS=$'\n\t'
+
+# About
+# =====
+# This script demonstrates how to invoke AWS API actions while having 2FA on
+# the IAM user.
+#
+# Note that in reality, you will extract the temporary credentials from the
+# `aws sts get-session-token` call and use that for all subsequent API calls
+# until it expires.
+#
+#
+# How to use
+# ==========
+# Change line 36 to an AWS API action that you are interested in.
+# Call this script with:
+# - the AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.
+# - first argument: the ARN of the MFA or the serial number, depending on the
+#   type of MFA device you are using
+# - 2nd argument: the OTP from the MFA device.
+#
+#
+# References
+# ==========
+# https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html
+
+main() {
+	local temp_credentials_with_mfa
+	temp_credentials_with_mfa="$(
+		aws sts get-session-token \
+			--serial-number "${1}" \
+			--token-code "${2}"
+	)"
+	local new_access_key_id
+	local new_secret_access_key
+	local session_token
+	new_access_key_id="$(jq -r '.Credentials.AccessKeyId' <<<"${temp_credentials_with_mfa}")"
+	new_secret_access_key="$(jq -r '.Credentials.SecretAccessKey' <<<"${temp_credentials_with_mfa}")"
+	session_token="$(jq -r '.Credentials.SessionToken' <<<"${temp_credentials_with_mfa}")"
+
+	# Modify below to whatever aws action you want
+	AWS_ACCESS_KEY_ID="${new_access_key_id}" \
+		AWS_SECRET_ACCESS_KEY="${new_secret_access_key}" \
+		AWS_SESSION_TOKEN="${session_token}" \
+		# MODIFY to include the aws action you want
+}
+
+main "$@"
+# vim:noet
