@@ -1,6 +1,6 @@
 # About
 
-Collection of code for System Administrative / DevOps purposes.
+Collection of code for System Administrative purposes.
 
 This is for my own use and reference, mainly for problems I have had to solve repeatedly.
 
