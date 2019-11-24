@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -euo pipefail
+IFS=$'\n\t'
+
+main() {
+	aws ssm send-command \
+		--instance-ids REPLACE_WITH_EC2_INSTANCE_ID \
+		--document-name AWS-ApplyAnsiblePlaybooks \
+		--parameters "SourceType=S3,SourceInfo='{\"path\":\"https://REPLACE_WITH_S3_BUCKET_NAME.s3-REPLACE_WITH_AWS_REGION.amazonaws.com/SOME/DIR\"}',InstallDependencies=True,PlaybookFile=REPLACE_WITH_PLAYBOOK_NAME,Check=False,ExtraVariables='app_environment=qa app_name=rusty'" \
+		--cloud-watch-output-config CloudWatchOutputEnabled=true,CloudWatchLogGroupName=REPLACE_WITH_CW_LOG_GROUP_NAME
+}
+
+main "$@"
+# vim:noet

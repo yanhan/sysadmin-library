@@ -1,0 +1,8 @@
+- name: Write some text to a file
+  shell: "echo 'michaelangelo' > /tmp/example.txt"
+
+- name: Write app_name variable to a file
+  shell: "echo '{{ app_name }}' > /tmp/app_name.txt"
+
+- name: Write app_environment variable to a file
+  shell: "echo '{{ app_environment }}' > /tmp/app_environment.txt"
