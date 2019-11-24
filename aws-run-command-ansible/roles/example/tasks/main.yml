@@ -6,3 +6,11 @@
 
 - name: Write app_environment variable to a file
   shell: "echo '{{ app_environment }}' > /tmp/app_environment.txt"
+
+- name: Copy a text file to the instance
+  copy:
+    src: apiversion.txt
+    dest: /tmp/apiversion.txt
+    owner: root
+    group: root
+    mode: "0644"
