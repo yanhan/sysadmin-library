@@ -4,6 +4,8 @@ Run Ansible playbook on EC2 instances using AWS SSM Run Command.
 
 We will be hosting the Ansible playbook on an S3 bucket and sending logs to CloudWatch Logs.
 
+**NOTE:** If you need to debug any of the parameters, please take a look at the code at: https://ap-southeast-1.console.aws.amazon.com/systems-manager/documents/AWS-ApplyAnsiblePlaybooks/content?region=ap-southeast-1
+
 
 ## Setup
 
