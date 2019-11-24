@@ -12,6 +12,8 @@ We will be hosting the Ansible playbook on an S3 bucket and sending logs to Clou
   - AmazonSSMManagedInstanceCore
   - CloudWatchAgentServerPolicy
 
+Copy the `example.yml` file and everything in `roles` to the S3 bucket, preserving the directory structure.
+
 
 ## IAM policy on IAM role of EC2 instance
 
