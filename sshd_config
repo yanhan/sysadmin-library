@@ -1,0 +1,54 @@
+# Allow IPv4 and IPv6
+AddressFamily any
+
+AllowTcpForwarding no
+X11Forwarding no
+
+AuthorizedKeysFile .ssh/authorized_keys
+
+Banner /etc/banner
+
+# Allow public key authentication only
+ChallengeResponseAuthentication no
+PasswordAuthentication no
+RSAAuthentication no
+GSSAPIAuthentication no
+HostbasedAuthentication no
+PubkeyAuthentication yes
+# Needed, otherwise cannot SSH in
+UsePAM yes
+
+# Disconnect inactive clients after 5 min.
+# Note that this is not what we think it is - data is still exchanged
+# in the background even if you open an SSH session and don't do anything.
+ClientAliveInterval 300
+
+Compression yes
+
+# Don't allow remote hosts to use forwarded ports
+GatewayPorts no
+
+# Record failed login attempts
+LogLevel VERBOSE
+
+MaxAuthTries 5
+
+PermitRootLogin no
+
+# Don't allow users to set their environment in authorized_keys file
+PermitUserEnvironment no
+
+PrintLastLog yes
+
+SyslogFacility AUTHPRIV
+
+UsePrivilegeSeparation sandbox
+
+# For Amazon Linux
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+HostKey /etc/ssh/ssh_host_ed22519_key
+
+# For AWS EC2 instance connect
+AuthorizedKeysCommand /opt/aws/bin/eic_run_authorized_keys %u %f
+AuthorizedKeysCommandUser ec2-instance-connect
