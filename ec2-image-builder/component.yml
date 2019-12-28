@@ -1,0 +1,39 @@
+# Schema is at https://docs.aws.amazon.com/imagebuilder/latest/userguide/managing-image-builder-console.html#image-builder-application-documents
+name: SampleStandardImageDocument
+description: Builds a standard EC2 image
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: UpdateOsStep
+        action: UpdateOS
+        timeoutSeconds: 300
+      - name: InstallRequiredSoftware
+        action: UpdateOS
+        inputs:
+          include:
+            - amazon-ssm-agent
+            - cowsay
+            - curl
+        timeoutSeconds: 150
+      - name: DownloadRdsCombinedCaBundle
+        action: S3Download
+        inputs:
+          - source: s3://rds-downloads/rds-combined-ca-bundle.pem
+            destination: /etc/ssl/certs/rds-combined-ca-bundle.pem
+        timeoutSeconds: 30
+      - name: SetOwnershipAndPermissionsOfRdsCombinedCaBundle
+        action: ExecuteBash
+        inputs:
+          commands:
+            - chown root:root /etc/ssl/certs/rds-combined-ca-bundle.pem
+            - chmod 444 /etc/ssl/certs/rds-combined-ca-bundle.pem
+        timeoutSeconds: 5
+  - name: validate
+    steps:
+      - name: CheckRdsCombinedCaBundlePresent
+        action: ExecuteBash
+        inputs:
+          commands:
+            - stat /etc/ssl/certs/rds-combined-ca-bundle.pem
+        timeoutSeconds: 5
