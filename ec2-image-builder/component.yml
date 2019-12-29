@@ -9,13 +9,11 @@ phases:
         action: UpdateOS
         timeoutSeconds: 300
       - name: InstallRequiredSoftware
-        action: UpdateOS
+        action: ExecuteBash
         inputs:
-          include:
-            - amazon-ssm-agent
-            - cowsay
-            - curl
-        timeoutSeconds: 150
+          commands:
+            - yum install -y cowsay curl
+        timeoutSeconds: 60
       - name: DownloadRdsCombinedCaBundle
         action: ExecuteBash
         inputs:
