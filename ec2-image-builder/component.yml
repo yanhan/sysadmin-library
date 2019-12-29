@@ -17,18 +17,13 @@ phases:
             - curl
         timeoutSeconds: 150
       - name: DownloadRdsCombinedCaBundle
-        action: S3Download
-        inputs:
-          - source: s3://rds-downloads/rds-combined-ca-bundle.pem
-            destination: /etc/ssl/certs/rds-combined-ca-bundle.pem
-        timeoutSeconds: 30
-      - name: SetOwnershipAndPermissionsOfRdsCombinedCaBundle
         action: ExecuteBash
         inputs:
           commands:
+            - curl https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem -o /etc/ssl/certs/rds-combined-ca-bundle.pem
             - chown root:root /etc/ssl/certs/rds-combined-ca-bundle.pem
             - chmod 444 /etc/ssl/certs/rds-combined-ca-bundle.pem
-        timeoutSeconds: 5
+        timeoutSeconds: 32
   - name: validate
     steps:
       - name: CheckRdsCombinedCaBundlePresent
