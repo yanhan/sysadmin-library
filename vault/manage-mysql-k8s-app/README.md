@@ -1,3 +1,8 @@
+# About
+
+Use Vault to manage MySQL and get MySQL credentials from k8s app.
+
+
 ## NOTES
 
 The Vault token issued from the Kubernetes login (done by sethvargo/vault-kubernetes-authenticator) will expire according to the `ttl` in `auth/kubernetes/role/app-for-mysql-mg-vault`. We configure the consul-template container to renew it.
