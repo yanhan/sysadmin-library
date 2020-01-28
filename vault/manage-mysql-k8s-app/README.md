@@ -9,7 +9,10 @@ The Vault token issued from the Kubernetes login (done by sethvargo/vault-kubern
 
 The files in the shared volume (which includes the the Vault token and accessor) must have have their owner set to the uid of the consul-template container. Otherwise it cannot read or renew them.
 
-The `fsGroup` of the Pod should be set to the gid of the main container so it can read the secret files rendered by the consul-template container.
+For the `kill -HUP $(pidof APP_NAME)` trick to work, either:
+
+- the consul-template and main application container must run as the same uid.
+- the consul-template container must run as root.
 
 The Golang code is not thread safe. It is possible for the database connection to be used while a reconnection is in progress.
 
