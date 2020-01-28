@@ -12,3 +12,117 @@ From within any container in Minikube, run:
 ```
 curl -H 'X-Vault-Token: REPLACE_WITH_VAULT_TOKEN'  http://192.168.77.1:8200/v1/sys/mounts
 ```
+
+
+## Install MySQL using Helm
+
+```
+helm install --name mysql-mg-vault stable/mysql
+```
+
+Expose the service to 127.0.0.1:
+```
+kubectl port-forward svc/mysql-mg-vault 13306:3306
+```
+
+Extract the MySQL root password from the Kubernetes Secret object.
+
+Then login to MySQL and create a second admin user that will be managed by Vault:
+```
+CREATE USER 'smapper'@'%' IDENTIFIED BY 'REPLACE WITH PASSWORD';
+GRANT ALL PRIVILEGES ON *.* TO 'smapper'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+```
+
+Still in MySQL, create a database named `apps_galore`:
+```
+CREATE DATABASE apps_galore;
+```
+
+
+## Let Vault administer MySQL
+
+```
+vault secrets enable database
+```
+
+Configure:
+```
+vault write database/config/mysql-mg-vault \
+  plugin_name=mysql-database-plugin \
+  connection_url="{{username}}:{{password}}@(127.0.0.1:13306)/" \
+  allowed_roles="app-for-mysql-mg-vault" \
+  username="REPLACE WITH second MySQL root user" \
+  password="REPLACE WITH PASSWORD"
+```
+
+Rotate the password:
+```
+vault write -force database/rotate-root/mysql-mg-vault
+```
+
+Create a role (**NOTE:** The value of the `db_name` parameter must be the same as the `XX` in `database/config/XX`` above when we created the configuration):
+```
+vault write database/roles/app-for-mysql-mg-vault \
+  db_name=mysql-mg-vault \
+  creation_statements="CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}'; GRANT SELECT, INSERT, UPDATE ON apps_galore.* TO '{{name}}'@'%';" \
+  default_ttl="2m" \
+  max_ttl="2m"
+```
+
+Test out the credentials:
+```
+vault read database/creds/app-for-mysql-mg-vault
+```
+
+
+## Let Vault use Kubernetes as authentication mechanism
+
+Create the Service Account and ClusterRoleBinding:
+```
+kubectl apply -f mysql-no-tls/rbac.yml
+```
+
+Create Vault policy:
+```
+vault policy write app-for-mysql-mg-vault ./app-for-mysql-mg-vault.hcl
+```
+
+Extract the Service Account's JWT token, CA cert and k8s IP address:
+```
+export VAULT_SECRET_NAME=$(kubectl get sa vault-mysql-no-tls -o jsonpath='{.secrets[0].name}')
+export SA_JWT_TOKEN=$(kubectl get secret "${VAULT_SECRET_NAME}" -o jsonpath='{.data.token}' | base64 -d)
+export SA_CA_CRT=$(kubectl get secret "${VAULT_SECRET_NAME}" -o jsonpath="{.data['ca\.crt']}" | base64 -d)
+export K8S_HOST=$(minikube ip)
+vault auth enable kubernetes
+vault write auth/kubernetes/config \
+  token_reviewer_jwt="${SA_JWT_TOKEN}" \
+  kubernetes_host="https://${K8S_HOST}:8443" \
+  kubernetes_ca_cert="${SA_CA_CRT}"
+vault write auth/kubernetes/role/app-for-mysql-mg-vault \
+  bound_service_account_names=vault-mysql-no-tls \
+  bound_service_account_namespaces=default \
+  policies=app-for-mysql-mg-vault \
+  ttl=24h
+```
+
+Create a temporary pod and test you can reach Kubernetes:
+```
+kubectl run vtest --image alpine:3.11.3 --generator=run-pod/v1 --rm -it --serviceaccount=vault-mysql-no-tls
+```
+
+When inside, run the following to test that the Kubernetes auth to Vault is working:
+```
+apk add curl jq
+export SA_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+curl -XPOST --data '{"jwt": "'"${SA_TOKEN}"'", "role": "app-for-mysql-mg-vault"}' http://192.168.77.1:8200/v1/auth/kubernetes/login | jq
+```
+
+You should get a JSON that contains a Vault token somewhere inside.
+
+
+## References
+
+- https://www.vaultproject.io/docs/secrets/databases/mysql-maria/
+- https://learn.hashicorp.com/vault/developer/db-creds-rotation
+- https://caylent.com/using-hashicorp-vault-on-kubernetes
