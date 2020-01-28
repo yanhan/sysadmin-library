@@ -44,6 +44,11 @@ Still in MySQL, create a database named `apps_galore`:
 CREATE DATABASE apps_galore;
 ```
 
+Initialize the database from the outside:
+```
+mysql -h 127.0.0.1 -p -P 13306 -u root -D apps_galore <./mysql-no-tls/tables.sql
+```
+
 
 ## Let Vault administer MySQL
 

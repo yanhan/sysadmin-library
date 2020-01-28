@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/signal"
@@ -64,13 +65,33 @@ func main() {
 			connectToDb(dbHost)
 		}
 	}()
+	webIds := []int{7, 9}
 	http.HandleFunc("/health-check", func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Database username = %s\n", dbCreds.Username)
 		err := db.Ping()
 		if err != nil {
 			log.Fatalln(err)
 		} else {
-			w.Write([]byte("OK"))
+			randomIdx := rand.Intn(len(webIds))
+			rowId := webIds[randomIdx]
+			rows, err := db.Query("SELECT name FROM web WHERE id=?;", rowId)
+			if err != nil {
+				log.Printf("Error fetching row id %d: %v\n", rowId, err)
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("ERROR"))
+			} else {
+				defer rows.Close()
+				rows.Next()
+				var agentName string
+				if err = rows.Scan(&agentName); err != nil {
+					log.Printf("Error scanning row: %v\n", err)
+					w.WriteHeader(http.StatusInternalServerError)
+					w.Write([]byte("ERROR"))
+				} else {
+					log.Printf("id = %d, name = %s\n", rowId, agentName)
+					w.Write([]byte("OK"))
+				}
+			}
 		}
 	})
 	log.Fatal(http.ListenAndServe(":8080", nil))
