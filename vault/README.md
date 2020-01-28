@@ -14,6 +14,11 @@ curl -H 'X-Vault-Token: REPLACE_WITH_VAULT_TOKEN'  http://192.168.77.1:8200/v1/s
 ```
 
 
+## ConfigMap for `VAULT_ADDR`
+
+Create a k8s Secret object called `vault-mysql-no-tls` in the `default` namespace. This Secret object has a single key `VAULT_ADDR` whose value is the Vault address.
+
+
 ## Install MySQL using Helm
 
 ```
@@ -121,8 +126,18 @@ curl -XPOST --data '{"jwt": "'"${SA_TOKEN}"'", "role": "app-for-mysql-mg-vault"}
 You should get a JSON that contains a Vault token somewhere inside.
 
 
+## NOTES
+
+The Vault token issued from the Kubernetes login (done by sethvargo/vault-kubernetes-authenticator) will expire according to the `ttl` in `auth/kubernetes/role/app-for-mysql-mg-vault`. We configure the consul-template container to renew it.
+
+The files in the shared volume (which includes the the Vault token and accessor) must have have their owner set to the uid of the consul-template container. Otherwise it cannot read or renew them.
+
+The `fsGroup` of the Pod should be set to the gid of the main container so it can read the secret files rendered by the consul-template container.
+
+
 ## References
 
 - https://www.vaultproject.io/docs/secrets/databases/mysql-maria/
 - https://learn.hashicorp.com/vault/developer/db-creds-rotation
 - https://caylent.com/using-hashicorp-vault-on-kubernetes
+- https://github.com/sethvargo/vault-kubernetes-authenticator
