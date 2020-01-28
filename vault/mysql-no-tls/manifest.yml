@@ -24,6 +24,7 @@ data:
     }
     {{ end }}
     EOF
+      command = "/bin/sh -c \"kill -HUP $(pidof main)\""
     }
 ---
 apiVersion: apps/v1
@@ -89,6 +90,13 @@ spec:
           securityContext:
             capabilities:
               add: ["SYS_PTRACE"]
+            # We need to run consul-template as either root or the same uid
+            # as the app container to send SIGHUP to the main process of the
+            # app container.
+            # Since it will take slightly more work to modify the
+            # consul-template Docker container to use the same uid as we intend
+            # for our application, we choose to run consul-template as root.
+            runAsUser: 0
           volumeMounts:
             - name: vault-auth
               mountPath: /home/vault

@@ -141,3 +141,4 @@ The `fsGroup` of the Pod should be set to the gid of the main container so it ca
 - https://learn.hashicorp.com/vault/developer/db-creds-rotation
 - https://caylent.com/using-hashicorp-vault-on-kubernetes
 - https://github.com/sethvargo/vault-kubernetes-authenticator
+- https://codelabs.developers.google.com/codelabs/vault-on-gke/index.html#21
