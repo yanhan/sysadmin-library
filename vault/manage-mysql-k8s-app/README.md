@@ -160,6 +160,7 @@ You should get a JSON that contains a Vault token somewhere inside.
 
 ## References
 
+- https://www.youtube.com/watch?v=6P26wg2rWgo (So You Want to Run Vault in Kubernetes? - Seth Vargo, Google)
 - https://www.vaultproject.io/docs/secrets/databases/mysql-maria/
 - https://learn.hashicorp.com/vault/developer/db-creds-rotation
 - https://caylent.com/using-hashicorp-vault-on-kubernetes
