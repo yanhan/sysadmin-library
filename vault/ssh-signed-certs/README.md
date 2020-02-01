@@ -16,7 +16,7 @@ and get its public key (no authentication required):
 vault read -field=public_key ssh-client-signer/config/ca >./trusted-user-ca-key.pem
 ```
 
-Create a Vault role for signing SSH keys of clients:
+Create a Vault role for signing SSH keys of clients (**NOTE**: The value of `default_user` is important, please change it accordingly, otherwise you will not be able to SSH in):
 ```
 vault write ssh-client-signer/roles/my-role -<<EOF
 {
