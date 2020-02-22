@@ -1,0 +1,100 @@
+# Launches an EC2 instance for provisioning and AMI.
+#
+# Assumptions:
+# - Most recent Amazon Linux 2 AMI will be used.
+# - Instance will be launched in a public subnet and have a public IP address.
+# - The security group should have port 22 open to the world.
+# - SSH key must be called `provision-ec2`
+# - IAM instance profile is named `provision-ec2` and should have the
+#   `AmazonSSMManagedInstance` IAM policy attached.
+#
+#
+# Required variables (submit via ansible-playbook command line)
+# - security_group_id
+# - subnet_id
+# - local_temp_dir
+---
+- name: Spin up EC2 instance
+  hosts: 127.0.0.1
+  connection: local
+  gather_facts: yes
+  vars:
+    aws_region: ap-southeast-1
+    iam_instance_profile: provision-ec2
+    instance_type: t3.small
+    ssh_key_name: provision-ec2
+  tasks:
+    - name: Create temporary file to store the EC2 run-instances output
+      tempfile:
+        path: "{{ local_temp_dir }}"
+        prefix: "ec2-run-instances"
+      register: ec2_run_instances_tempfile
+    - name: Ensure only we can access the temporary file for EC2 run-instances output
+      file:
+        path: "{{ ec2_run_instances_tempfile.path }}"
+        mode: "0600"
+        owner: "{{ ansible_env.USER }}"
+    - name: Get latest Amazon Linux 2 AMI
+      shell: "aws --region {{ aws_region }} ssm get-parameter --name /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2 | jq -r .Parameter.Value"
+      register: get_ami_id
+    - name: Get UNIX timestamp
+      shell: "date +'%s'"
+      register: get_unix_timestamp
+    - name: Set facts
+      set_fact:
+        ami_id: "{{ get_ami_id.stdout }}"
+        client_token: "my_ec2_{{ get_unix_timestamp.stdout }}"
+    - name: Spin up EC2 instance
+      shell: "aws --region {{ aws_region }} ec2 run-instances --image-id {{ ami_id }} --instance-type {{ instance_type }} --key-name {{ ssh_key_name }} --monitoring Enabled=false --security-group-ids {{ security_group_id}} --subnet-id {{ subnet_id }} --client-token {{ client_token }} --ebs-optimized --iam-instance-profile Name={{ iam_instance_profile }} --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=form-seven},{Key=Department,Value=writing}]' --count 1:1 --associate-public-ip-address > {{ ec2_run_instances_tempfile.path }}"
+    - name: Get EC2 instance id
+      shell: "jq -r '.Instances[0].InstanceId' < {{ ec2_run_instances_tempfile.path }}"
+      register: get_ec2_instance_id
+    - name: Set fact for EC2 instance id
+      set_fact:
+        ec2_instance_id: "{{ get_ec2_instance_id.stdout }}"
+    - name: Remove temporary file for EC2 run-instances output
+      file:
+        path: "{{ ec2_run_instances_tempfile.path }}"
+        state: absent
+    - name: Wait 1 minute for the EC2 instance to be up
+      pause:
+        minutes: 1
+    - name: Get public IP address of the EC2 instance
+      shell: "aws --region {{ aws_region }} ec2 describe-instances --instance-ids {{ ec2_instance_id }} | jq -r '.Reservations[0].Instances[0].PublicIpAddress'"
+      register: get_ec2_instance_public_ip_address
+    - name: Add host to host group for provisioning
+      add_host:
+        name: "{{ get_ec2_instance_public_ip_address.stdout }}"
+        groups: ec2_instance_to_provision
+        ansible_ssh_private_key_file: "{{ ansible_env.HOME }}/.ssh/{{ ssh_key_name }}.pem"
+
+- name: Provision EC2 instance
+  hosts: ec2_instance_to_provision
+  connection: ssh
+  user: ec2-user
+  tasks:
+    # Please replace with actual tasks and role here
+    - name: Create a file on the host
+      shell: "touch /home/ec2-user/volcano.txt"
+
+- name: Create AMI and terminate the EC2 instance
+  hosts: 127.0.0.1
+  connection: local
+  gather_facts: yes
+  vars:
+    # For some reason the vars we defined above are not defined here
+    aws_region: ap-southeast-1
+  tasks:
+    # TODO: There is a bug with this that doesn't make use of botocore / boto3 in the virtualenv
+    - name: Create AMI
+      ec2_ami:
+        instance_id: "{{ ec2_instance_id }}"
+        description: "REPLACE with actual description"
+        name: "example-amzn-linux-2-ami"
+        region: "{{ aws_region }}"
+        tags:
+          Name: "example-amzn-linux-2-ami"
+          Point: Blank
+        wait: yes
+    - name: Terminate EC2 instance
+      shell: "aws --region {{ aws_region }} ec2 terminate-instances --instance-ids {{ ec2_instance_id }}"
