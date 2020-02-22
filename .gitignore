@@ -1,5 +1,8 @@
 .terraform
+build
 main
+run
+secret.yml
 secrets.tfvars
 terraform.tfstate
 terraform.tfstate.backup
