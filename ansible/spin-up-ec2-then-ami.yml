@@ -13,12 +13,19 @@
 # - security_group_id
 # - subnet_id
 # - local_temp_dir
+#
+#
+# Required Python packages
+# - boto3
+# - botocore
 ---
 - name: Spin up EC2 instance
-  hosts: 127.0.0.1
+  hosts: all
   connection: local
   gather_facts: yes
   vars:
+    # This is to make use of the Python in virtualenv
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
     aws_region: ap-southeast-1
     iam_instance_profile: provision-ec2
     instance_type: t3.small
@@ -82,15 +89,19 @@
   connection: local
   gather_facts: yes
   vars:
-    # For some reason the vars we defined above are not defined here
+    # This is to make use of the Python in virtualenv
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    # NOTE: We have to define this again here.
     aws_region: ap-southeast-1
   tasks:
-    # TODO: There is a bug with this that doesn't make use of botocore / boto3 in the virtualenv
+    - name: Get datetime
+      shell: "date +'%Y%m%d-%H%M%S'"
+      register: get_datetime_for_ami_name
     - name: Create AMI
       ec2_ami:
-        instance_id: "{{ ec2_instance_id }}"
+        instance_id: "{{ hostvars['127.0.0.1']['ec2_instance_id'] }}"
         description: "REPLACE with actual description"
-        name: "example-amzn-linux-2-ami"
+        name: "example-amzn-linux-2-ami-{{ get_datetime_for_ami_name.stdout }}"
         region: "{{ aws_region }}"
         tags:
           Name: "example-amzn-linux-2-ami"
