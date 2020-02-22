@@ -1,0 +1,21 @@
+##### Groups
+
+# Let a group run any command as root without password.
+%yourgroupname ALL=(ALL) NOPASSWD: ALL
+
+# Let a group run limited commands as root without password.
+# Note that we have to supply the full path to the binary.
+%yourgroupname ALL=(ALL) NOPASSWD: /bin/ls *
+
+# Let a group run limited commands as another user, without password.
+%yourgroupname ALL=(anothergroupname) NOPASSWD: /bin/kill *
+%yourgroupname ALL=(anothergroupname) NOPASSWD: /usr/bin/touch *
+# This forces the command to include the -a flag
+%yourgroupname ALL=(anothergroupname) NOPASSWD: /bin/ls -a *
+
+
+
+##### Users
+
+# Let a user run any command as root without password.
+yourusername ALL=(ALL) NOPASSWD: ALL
