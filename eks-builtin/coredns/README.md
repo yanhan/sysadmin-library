@@ -16,3 +16,16 @@ with:
 ```
 forward . /etc/resolve.conf
 ```
+
+
+## Copyright
+
+The following files in this directory are Copyright (c) to Amazon Web Services:
+
+- clusterrolebinding.yml
+- clusterrole.yml
+- configmap.yml
+- deployment.yml
+- serviceaccount.yml
+
+All other files in this directory are Copyright (c) 2019 to Yan Han Pang, under the 3-Clause BSD License.
