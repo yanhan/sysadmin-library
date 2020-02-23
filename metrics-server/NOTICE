@@ -1,0 +1,9 @@
+In metrics-server-deployment.yaml , we appended the following lines in order for metrics-server to get Pod and node metrics:
+```
+        # To get metrics, we need the --kubelet-preferred-address-types=InternalIP flag.
+        # From: https://www.digitalocean.com/community/tutorials/how-to-autoscale-your-workloads-on-digitalocean-kubernetes
+          - /metrics-server
+          - --logtostderr
+          - --metric-resolution=60s
+          - --kubelet-preferred-address-types=InternalIP
+```
