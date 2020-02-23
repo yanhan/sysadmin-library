@@ -1,0 +1,37 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "DenySSE-S3",
+            "Effect": "Deny",
+            "Principal": "*",
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::samplebucketname/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "s3:x-amz-server-side-encryption": "AES256"
+                }
+            }
+        },
+        {
+            "Sid": "RequireKMSEncryption",
+            "Effect": "Deny",
+            "Principal": "*",
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::samplebucketname/*"
+            ],
+            "Condition": {
+                "StringNotLikeIfExists": {
+                    "s3:x-amz-server-side-encryption-aws-kms-key-id": "arn:aws:kms:ap-southeast-1:111122223333:key/key-id"
+                }
+            }
+        }
+    ]
+}
