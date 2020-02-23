@@ -1,0 +1,77 @@
+---
+apiVersion: extensions/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: kube-proxy
+spec:
+  allowPrivilegeEscalation: true
+  allowedCapabilities: []
+  allowedHostPaths:
+    - pathPrefix: /lib/modules
+      readOnly: true
+    - pathPrefix: /run/xtables.lock
+    - pathPrefix: /var/log
+  defaultAllowPrivilegeEscalation: true
+  fsGroup:
+    ranges:
+      - min: 1
+        max: 65535
+    rule: MustRunAs
+  hostIPC: false
+  hostNetwork: true
+  hostPID: false
+  privileged: true
+  requiredDropCapabilities:
+    - all
+  runAsGroup:
+    ranges:
+      - min: 1
+        max: 65535
+    rule: MustRunAs
+  runAsUser:
+    rule: RunAsAny
+    #ranges:
+      #- min: 1
+        #max: 65535
+    #rule: MustRunAs
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    ranges:
+      - min: 1
+        max: 65535
+    rule: MustRunAs
+  volumes:
+    - configMap
+    - downwardAPI
+    - emptyDir
+    - hostPath
+    - persistentVolumeClaim
+    - projected
+    - secret
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: kube-proxy-use-own-psp
+  namespace: kube-system
+rules:
+  - apiGroups: ["extensions"]
+    resources: ["podsecuritypolicies"]
+    resourceNames: ["kube-proxy"]
+    verbs: ["use"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kube-proxy-use-own-psp
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kube-proxy-use-own-psp
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: kube-proxy
+    namespace: kube-system
