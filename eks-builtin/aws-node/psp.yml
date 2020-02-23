@@ -1,0 +1,76 @@
+---
+apiVersion: extensions/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: aws-node
+spec:
+  allowPrivilegeEscalation: true
+  allowedCapabilities: []
+  allowedHostPaths:
+    - pathPrefix: /opt/cni/bin
+    - pathPrefix: /etc/cni/net.d
+    - pathPrefix: /var/log
+    - pathPrefix: /var/run/docker.sock
+  defaultAllowPrivilegeEscalation: true
+  fsGroup:
+    ranges:
+      - min: 1
+        max: 65535
+    rule: MustRunAs
+  hostIPC: false
+  hostNetwork: true
+  hostPID: false
+  hostPorts:
+    - min: 61678
+      max: 61678
+  privileged: true
+  requiredDropCapabilities:
+    - all
+  runAsGroup:
+    ranges:
+      - min: 1
+        max: 65535
+    rule: MustRunAs
+  runAsUser:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    ranges:
+      - min: 1
+        max: 65535
+    rule: MustRunAs
+  volumes:
+    - configMap
+    - downwardAPI
+    - emptyDir
+    - hostPath
+    - persistentVolumeClaim
+    - projected
+    - secret
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: aws-node-use-own-psp
+  namespace: kube-system
+rules:
+  - apiGroups: ["extensions"]
+    resources: ["podsecuritypolicies"]
+    resourceNames: ["aws-node"]
+    verbs: ["use"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: aws-node-use-own-psp
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: aws-node-use-own-psp
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: aws-node
+    namespace: kube-system
