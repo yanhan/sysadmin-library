@@ -17,3 +17,16 @@ We obtained the contents of the following files from EKS:
 We authored the following file to use aws-node without the EKS privileged PSP:
 
 - psp.yml
+
+
+## Copyright
+
+The following files in this directory are Copyright (c) to Amazon Web Services, under Apache License 2.0:
+
+- aws-node.yml
+- clusterrolebinding.yml
+- clusterrole.yml
+- crd.yml
+- serviceaccount.yml
+
+All other files in this directory are Copyright (c) 2019 to Yan Han Pang, under the 3-Clause BSD License.
