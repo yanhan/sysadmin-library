@@ -1,3 +1,5 @@
+*.csv
+*.pem
 .terraform
 build
 main
