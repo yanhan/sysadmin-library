@@ -1,0 +1,47 @@
+## NOTE: sample config file is available at: https://github.com/oauth2-proxy/oauth2-proxy/blob/master/contrib/oauth2-proxy.cfg.example
+
+# The address OAuth Proxy listens on
+http_address = "127.0.0.1:4180"
+
+# Format: ${YOURCOMPANYDOMAIN}/oauth/callback
+redirect_url = "https://REPLACEME/oauth2/callback"
+
+# OAuth2 Proxy will forward request to these. Please edit this list
+upstreams = [
+  "http://127.0.0.1:8080/"
+]
+
+# Use GitHub provider by default, because we can restrict users using it
+# relatively easily.
+provider = "github"
+
+# Get client_id and client_secret from GitHub
+client_id = "REPLACEME"
+client_secret = "REPLACEME"
+
+# List of GitHub users to allow.
+# It is also possible to restrict by org, team, repo, etc.
+# See https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider/#github-auth-provider
+github_users = [
+  "mygithubuser_REPLACEME"
+]
+
+# This is required, set to '*' for now
+email_domains = [
+  "*"
+]
+
+# Routes to allow anyone to access without auth.
+# HTTP method can be specified
+skip_auth_routes = [
+  "^/endpoint/01",
+  "GET=^/ping",
+]
+
+cookie_name = "_oauth2_proxy"
+# Generate this cookie secret using:
+# python -c 'import os,base64; print(base64.urlsafe_b64encode(os.urandom(32)).decode())'
+cookie_secret = ""
+cookie_expire = "168h"
+cookie_secure = true
+cookie_httponly = true
