@@ -3,7 +3,7 @@
 # The address OAuth Proxy listens on
 http_address = "127.0.0.1:4180"
 
-# Format: ${YOURCOMPANYDOMAIN}/oauth/callback
+# Format: ${YOURCOMPANYDOMAIN}/oauth2/callback
 redirect_url = "https://REPLACEME/oauth2/callback"
 
 # OAuth2 Proxy will forward request to these. Please edit this list
