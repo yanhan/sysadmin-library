@@ -2,11 +2,15 @@
 
 metrics-server manifests, ready for use. 2 instance HA deployment, with PDB set to 1 max unavailable.
 
-Tested on:
+Repo: https://github.com/kubernetes-sigs/metrics-server
+
+
+## Tested using
+
+Version: v0.6.1
+
 - kind; Kubernetes 1.23.0 (25 Aug 2022)
 - EKS; Kubernetes 1.22.12 (25 Aug 2022)
-
-Repo: https://github.com/kubernetes-sigs/metrics-server
 
 Manifests: https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.6.1/high-availability.yaml
 
