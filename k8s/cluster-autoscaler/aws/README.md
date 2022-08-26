@@ -11,6 +11,7 @@ Manifests: https://raw.githubusercontent.com/kubernetes/autoscaler/cluster-autos
 
 - EKS; k8s v1.22.12 (26 Aug 2022)
   - Using 1 multi-AZ ASG with mixed instances, spot lifecycle
+  - Using 2 multi-AZ ASG with mixed instances, spot lifecycle, different capacity nodes for each ASG
 
 
 ## Configuration
