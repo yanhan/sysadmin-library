@@ -50,6 +50,11 @@ kubectl apply -f ./fluent-bit.yaml
 ```
 
 
+## Viewing Logs
+
+You can go to CloudWatch Logs Insights to query for logs. You will need to select the correct log group (it has the prefix `/aws/containerinsights/EKS_CLUSTER_NAME`); the default query should show some application logs.
+
+
 ## Copyright
 
 The following files in this directory are Copyright to Amazon Web Services under the MIT-0 License:
