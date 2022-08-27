@@ -12,6 +12,36 @@ Manifests: https://raw.githubusercontent.com/kubernetes/autoscaler/cluster-autos
 - EKS; k8s v1.22.12 (26 Aug 2022)
   - Using 1 multi-AZ ASG with mixed instances, spot lifecycle
   - Using 2 multi-AZ ASG with mixed instances, spot lifecycle, different capacity nodes for each ASG
+  - Using 3 single AZ ASG with mixed instances, spot lifecycle, with PersistentVolume backed by EBS
+
+
+## NOTE on use with PersistentVolume backed by EBS
+
+EBS volumes are single AZ only. As such, if you are using PersistentVolumes backed by EBS volumes, you will want Pods to be scheduled onto the same AZ as the EBS volume.
+
+You will want to setup:
+
+- Multiple ASGs (Node Groups), each ASG only with subnets from 1 single AZ
+- Add the `--balance-similar-node-groups` command line flag to the cluster-autoscaler Deployment spec
+- PersistentVolumes must have their `nodeAffinity.required.nodeSelectorTerms` spec with `topology.kubernetes.io/zone` set to the AZ. Refer to the example code below
+
+Example of setting nodeAffinity on PersistentVolume spec:
+```
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: topology.kubernetes.io/zone
+              operator: In
+              values:
+                - ap-southeast-1a
+```
+
+It is only with this that Kubernetes will know to schedule a Pod using this PersistentVolume onto a node in the same AZ. Which will then let cluster-autoscaler take it into account and scale up the correct ASG in the desired AZ.
+
+The cluster-autoscaler documentation could do better in explaining this.
+
+Credits to this GitHub issue for giving enough of a hint for me to solve it: https://github.com/kubernetes/autoscaler/issues/4739#issuecomment-1094109090
 
 
 ## Configuration
@@ -58,3 +88,4 @@ All other files are Copyright (c) 2019 to Yan Han Pang, under the 3-Clause BSD L
 
 - https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md
 - https://docs.aws.amazon.com/eks/latest/userguide/associate-service-account-role.html
+- https://github.com/kubernetes/autoscaler/issues/4739#issuecomment-1094109090
