@@ -1,6 +1,7 @@
 *.csv
 *.pem
 .terraform
+.vagrant
 build
 main
 run
