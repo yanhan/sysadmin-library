@@ -10,7 +10,7 @@ Repo: https://github.com/kubernetes-sigs/metrics-server
 Version: v0.6.1
 
 - kind; Kubernetes 1.23.0 (25 Aug 2022)
-- EKS; Kubernetes 1.22.12 (25 Aug 2022)
+- EKS; Kubernetes 1.22.12 (25 Aug 2022), 1.23.7 (05 Sep 2022)
 
 Manifests: https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.6.1/high-availability.yaml
 
