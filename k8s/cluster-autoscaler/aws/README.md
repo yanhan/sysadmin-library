@@ -56,22 +56,26 @@ Make a copy of the `policy.json.tmpl` file. Replace the `REGION`, `AWS_ACCOUNT_I
 
 Create an IAM role for service account with this policy attached. Refer to https://docs.aws.amazon.com/eks/latest/userguide/associate-service-account-role.html for details on creating this IAM role, especially wrt to its trust policy.
 
-### EKS Service account annotation
-
-In your copy of the `cluster-autoscaler-autodiscover.yaml` file, locate the ServiceAccount and replace the value of the `eks.amazonaws.com/role-arn` annotation with the ARN of the IAM role for the cluster-autoscaler.
-
-### ASG tag for name
-
-In your copy of the `cluster-autoscaler-autodiscover.yaml` file, locate the Deployment and replace `<YOUR CLUSTER NAME>` with your EKS cluster's actual name.
-
 
 ## How to use
 
 Follow the instructions in the `Configuration` section.
 
+Create `patches/serviceaccount.yaml` from the example file. Then modify the value of the annotation `eks.amazonaws.com/role-arn`, using the IAM role ARN for the cluster-autoscaler:
+```
+cp patches/serviceaccount.yaml{.example,}
+# Modify eks.amazonaws.com/role-arn annotation
+```
+
+Create `patches/deployment.yaml` from the example file. Then modify the command, replacing `<YOUR CLUSTER NAME>` with the actual name of your EKS cluster:
+```
+cp patches/deployment.yaml{.example,}
+# Modify to replace ASG tag with actual EKS cluster name
+```
+
 Then run:
 ```
-kubectl kustomize base | kubectl apply -f -
+kubectl kustomize patches | kubectl apply -f -
 ```
 
 
