@@ -71,7 +71,7 @@ Follow the instructions in the `Configuration` section.
 
 Then run:
 ```
-kubectl apply -f ./cluster-autoscaler-autodiscover.yaml
+kubectl kustomize base | kubectl apply -f -
 ```
 
 
@@ -79,7 +79,7 @@ kubectl apply -f ./cluster-autoscaler-autodiscover.yaml
 
 The following files in this directory are Copyright (c) to Cloud Native Computing Foundation under the Apache License 2.0:
 
-- cluster-autoscaler-autodiscover.yml
+- base/cluster-autoscaler-autodiscover.yml
 
 All other files are Copyright (c) 2019 to Yan Han Pang, under the 3-Clause BSD License.
 

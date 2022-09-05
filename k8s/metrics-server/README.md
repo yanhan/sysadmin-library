@@ -24,8 +24,16 @@ At least 2 nodes required due to pod anti affinity of `requiredDuringSchedulingI
 
 ## How to use
 
+Without customization:
 ```
-kubectl apply -f ./high-availability.yaml
+kubectl kustomize base | kubectl apply -f -
+```
+
+To customize deployment details (eg. resources requests and limits; see the section below on why you might want to do that):
+```
+cp patches/deployment.yaml{.example,}
+# Modify patches/deployment.yaml
+kubectl kustomize patches | kubectl apply -f -
 ```
 
 
@@ -42,7 +50,7 @@ For larger clusters, recommendation is: 1m CPU and 2MiB memory per node in the k
 
 The following files in this directory are Copyright (c) to Cloud Native Computing Foundation under Apache License 2.0:
 
-- high-availability.yaml
+- base/high-availability.yaml
 
 All other files in this directory are Copyright (c) 2019 to Yan Han Pang, under the 3-Clause BSD License.
 

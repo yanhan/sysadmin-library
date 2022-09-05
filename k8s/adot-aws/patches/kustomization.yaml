@@ -1,0 +1,10 @@
+---
+# REPLACE this value
+namespace: default
+
+resources:
+  - ../base
+
+patchesStrategicMerge:
+  - serviceaccount.yaml
+  - collector-config-xray.yaml

@@ -34,19 +34,21 @@ replacing `AWS_REGION`, `AWS_ACCOUNT_ID` and `EKS_CLUSTER_NAME` with appropriate
 
 ## How to use
 
-First, create the namespace:
+Create `patches/configmap.yaml` from `patches/configmap.yaml.example`:
 ```
-kubectl apply -f ./namespace.yaml
-```
-
-Then, open the `create-cm.sh` script with a text editor and modify the values of the `ClusterName` and `RegionName` variables. Then run it:
-```
-./create-cm.sh
+cp patches/configmap.yaml{.example,}
 ```
 
-Finally, modify the value of the annotation `eks.amazonaws.com/role-arn` in `fluent-bit.yaml`. Then run:
+Modify the values of `cluster.name` and `logs.region` in `patches/configmap.example`. For instance:
 ```
-kubectl apply -f ./fluent-bit.yaml
+data:
+  cluster.name: staging-raynor
+  logs.region: ap-southeast-1
+```
+
+Then apply:
+```
+kubectl kustomize patches | kubectl apply -f -
 ```
 
 
@@ -59,9 +61,10 @@ You can go to CloudWatch Logs Insights to query for logs. You will need to selec
 
 The following files in this directory are Copyright to Amazon Web Services under the MIT-0 License:
 
+- base/configmap.yaml
+- base/fluent-bit.yaml
+- base/namespace.yaml
 - create-cm.sh
-- fluent-bit.yaml
-- namespace.yaml
 
 All other files in this directory are Copyright to Yan Han Pang, under the 3-Clause BSD License.
 

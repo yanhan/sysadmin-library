@@ -3,8 +3,7 @@ apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
   name: my-collector-xray
-  # CHANGE ME
-  namespace: default
+  namespace: PLACEHOLDER_DONT_EDIT
 spec:
   mode: deployment
   # CHANGE ME

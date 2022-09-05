@@ -17,7 +17,14 @@ Manifests: https://github.com/kubernetes/kube-state-metrics/tree/v2.5.0/examples
 
 For the standard setup:
 ```
-kubectl apply -f ./standard
+kubectl kustomize base | kubectl apply -f -
+```
+
+To customize the Deployment:
+```
+cp patches/deployment.yaml{.example,}
+# Modify patches/deployment.yaml
+kubectl kustomize patches | kubectl apply -f -
 ```
 
 
@@ -61,7 +68,13 @@ Automated sharding is experimental and the maintainers warn that it may be remov
 
 ## Copyright
 
-The following files in the `standard` subdirectory of this directory are Copyright (c) to Cloud Native Computing Foundation, under Apache License 2.0
+The following files are Copyright (c) to Cloud Native Computing Foundation, under Apache License 2.0
+
+- base/cluster-role-binding.yaml
+- base/cluster-role.yaml
+- base/deployment.yaml
+- base/service-account.yaml
+- base/service.yaml
 
 All other files in this directory are Copyright (c) 2019 to Yan Han Pang, under the 3-Clause BSD License.
 

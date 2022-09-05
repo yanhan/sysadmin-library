@@ -16,7 +16,7 @@ Manifest obtained from: https://kubernetes.io/docs/tasks/administer-cluster/dns-
 Check the value of the `--target` flag in the Deployment. If the name of the coredns deployment is named something else, please change that.
 
 ```
-kubectl apply -f ./manifest.yaml
+kubectl kustomize base | kubectl apply -f -
 ```
 
 ### Tuning coredns scaling parameters
@@ -34,7 +34,7 @@ After the first creation, there will be a ConfigMap named `kube-dns-autoscaler` 
 
 The following files in this directory are Copyright (c) to The Kubernetes Authors under the CC BY 4.0 License:
 
-- manifest.yaml
+- base/manifest.yaml
 
 All other files in this directory are Copright (c) 2019 Yan Han Pang, under the 3-Clause BSD License.
 

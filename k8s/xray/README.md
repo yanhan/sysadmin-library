@@ -19,13 +19,18 @@ The code is a mix of:
 
 Create an IAM role for service account with the following managed IAM policy attached: `arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess` .
 
-Make a copy of xray.yaml and use the ARN of the above IAM role as the value of the `eks.amazonaws.com/role-arn` annotation on the ServiceAccount.
+Take note of the value of the IAM role ARN.
 
 ### Applying
 
-Then run:
 ```
-kubectl apply -f ./xray.yaml
+cp patches/serviceaccount.yaml{.example,}
+# Modify patches/serviceaccount.yaml
+# Specifically, the value of the ServiceAccount metadata.annotations 
+# `eks.amazonaws.com/role-arn` . Its value should be the IAM role ARN
+# obtained in the previous step
+
+kubectl kustomize patches | kubectl apply -f -
 ```
 
 
@@ -38,7 +43,7 @@ Do note that if you are trying this with the sample frontend and backend apps on
 
 The following files in this directory are Copyright (c) 2018 Amazon.com, Inc. or its affiliates, under the Apache 2.0 License:
 
-- xray.yaml
+- base/xray.yaml
 
 All other files in this directory are Copyright (c) 2019 to Yan Han Pang, under the 3-Clause BSD License.
 

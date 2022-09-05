@@ -38,22 +38,26 @@ After that (or in parallel), create IAM role for service account for the ADOT Co
 
 Please take note of the namespace used. The ADOT Collector needs to be deployed in the same namespace as the service account.
 
-Take note of the IAM role, then modify `sa.yaml` with the correct value of the `eks.amazonaws.com/role-arn` annotation. Then apply:
 ```
-kubectl apply -f ./sa.yaml
+cp patches/serviceaccount.yaml{.example,}
+# In patches/serviceaccount.yaml, modify the `eks.amazonaws.com/role-arn`
+# annotation, using the value of the IAM role ARN just created.
 ```
 
 ### Install ADOT Collector
 
-Thereafter, modify the `collector-config-xray.yaml` file, in particular the values for these fields:
+Now, make a copy of the `patches/collector-config-xray.yaml` file from the example file:
+```
+cp patches/collector-config-xray.yaml{.example,}
+```
 
-- `metadata.namespace` (must be the same as the ServiceAccount in previous step)
-- `spec.config` -> `exporters.awsxray.region`.
-- `spec.serviceAccount` (must be the name of the ServiceAccount in the previous step)
+Thereafter, modify the `patches/collector-config-xray.yaml` file, in particular the values for these fields:
+
+- `spec.config` -> `exporters.awsxray.region`
 
 Then apply:
 ```
-kubectl apply -f ./collector-config-xray.yaml
+kubectl kustomize patches | kubectl apply -f -
 ```
 
 ### Sending traces to the ADOT Collector
@@ -95,7 +99,7 @@ Go to AWS XRay console to search for this Trace.
 The following files in this directory are Copyright (c) Amazon.com, Inc. or its affiliates, under the Apache 2.0 License:
 
 - addons-otel-permissions.yaml
-- collector-config-xray.yaml
+- base/collector-config-xray.yaml
 - sample-app.yaml
 
 The following files in this directory are Copyright (c) The cert-manager Authors, under the Apache 2.0 License:

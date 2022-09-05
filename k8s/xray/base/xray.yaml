@@ -28,7 +28,7 @@ metadata:
     app: xray-daemon
   annotations:
     # TODO: add appropriate value
-    eks.amazonaws.com/role-arn:
+    eks.amazonaws.com/role-arn: REPLACE
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

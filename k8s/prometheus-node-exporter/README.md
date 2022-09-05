@@ -31,7 +31,7 @@ Use `helm template` to generate new manifests if you need to tweak it.
 ## How to use
 
 ```
-kubectl apply -f ./manifest.yaml
+kubectl kustomize base | kubectl apply -f -
 ```
 
 
@@ -51,7 +51,7 @@ curl -i http://127.0.0.1:9100/metrics
 
 The following files in this directory are Copyright (c) to the Prometheus Authors under Apache License 2.0:
 
-- manifest.yaml
+- base/manifest.yaml
 
 All other files in this directory are Copyright (c) to Yan Han Pang, under the 3-Clause BSD License.
 
