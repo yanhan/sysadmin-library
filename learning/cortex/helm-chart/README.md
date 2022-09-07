@@ -52,6 +52,8 @@ helm install cortex cortex-helm/cortex --namespace cortex --values values.yaml -
 
 On AWS, create a TCP Target Group containing all the EKS nodes. Ensure the port is the same as the NodePort of the `cortex-nginx` service.
 
+On the EKS node group security group, add a rule to allow ingress from `0.0.0.0` to the NodePort.
+
 Create an NLB that points to the Target Group. HTTP port 80 on the NLB will do.
 
 Wait for the Target Group health checks to pass.
