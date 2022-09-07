@@ -1,0 +1,34 @@
+---
+config:
+  storage:
+    engine: blocks
+  blocks_storage:
+    backend: s3
+    s3:
+      endpoint: s3.{{ (datasource "aws").region }}.amazonaws.com
+      region: {{ (datasource "aws").region }}
+      bucket_name: {{ (datasource "aws").s3.blocks }}
+  alertmanager_storage:
+    backend: s3
+    s3:
+      endpoint: s3.{{ (datasource "aws").region }}.amazonaws.com
+      region: {{ (datasource "aws").region }}
+      bucket_name: {{ (datasource "aws").s3.alertmanager }}
+  ruler_storage:
+    backend: s3
+    s3:
+      endpoint: s3.{{ (datasource "aws").region }}.amazonaws.com
+      region: {{ (datasource "aws").region }}
+      bucket_name: {{ (datasource "aws").s3.ruler }}
+
+ingester:
+  statefulSet:
+    enabled: true
+
+nginx:
+  service:
+    type: NodePort
+
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: {{ (datasource "aws").cortex_iam_role_arn }}
