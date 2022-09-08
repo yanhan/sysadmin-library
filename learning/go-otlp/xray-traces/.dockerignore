@@ -1,0 +1,7 @@
+.dockerignore
+.gitignore
+Dockerfile
+README.md
+base
+go-otlp-xray
+traces.txt
