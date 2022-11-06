@@ -1,0 +1,3 @@
+[submodule "learning/argocd/echo-manifests"]
+	path = learning/argocd/echo-manifests
+	url = https://github.com/yanhan/echo-manifests.git
