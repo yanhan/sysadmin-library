@@ -1,3 +1,6 @@
 [submodule "learning/argocd/echo-manifests"]
 	path = learning/argocd/echo-manifests
 	url = https://github.com/yanhan/echo-manifests.git
+[submodule "learning/rollouts/kube-prometheus"]
+	path = learning/rollouts/kube-prometheus
+	url = https://github.com/prometheus-operator/kube-prometheus.git
