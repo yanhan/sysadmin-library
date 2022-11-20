@@ -186,6 +186,45 @@ k argo rollouts promote myapp
 ```
 
 
+## nginx traffic splitting with Prometheus analysis
+
+Follow the instructions in the above sections to install:
+- kube-prometheus
+- ingress-nginx
+
+Then run:
+```
+kaf ./nginx-traffic-split-auto.yml
+```
+
+Port forward:
+```
+kpf -n ingress-nginx svc/ingress-nginx-controller 8888:80
+```
+
+Verify it is working:
+```
+c -i -H 'Host: nginx.auto' 'http://127.0.0.1:8888'
+```
+
+Monitor the rollout:
+```
+k argo rollouts get rollout myapp -w
+```
+
+Set new image:
+```
+k argo rollouts set image myapp goserver=localhost:6001/yanhan/goprom-argo-rollouts:0.2
+```
+
+Wait for at least 2 analysis runs to pass. Then enable failures by running the following a few times (so it reaches a few pods):
+```
+c -i -H 'Host: nginx.auto' -H 'X-Canary: usecanary' 'http://127.0.0.1:8888/fail/enable'
+```
+
+Then wait for the analysis runs to fail (run `kdes analysisrun` to get details)
+
+
 ## References
 
 - https://argoproj.github.io/argo-rollouts/installation/
