@@ -13,7 +13,9 @@ import (
 )
 
 const (
-	_port = 3333
+	_port          = 3333
+	_apiVersion    = "v1"
+	_versionHeader = "version"
 )
 
 var (
@@ -46,6 +48,7 @@ func main() {
 		_failHalfTheTimeLock.RLock()
 		defer _failHalfTheTimeLock.RUnlock()
 		_mainRequestsTotal.Inc()
+		w.Header().Add(_versionHeader, _apiVersion)
 		if _failHalfTheTime && requestShouldFail() {
 			_mainRequests.WithLabelValues("false").Inc()
 			w.WriteHeader(http.StatusInternalServerError)
@@ -56,17 +59,20 @@ func main() {
 		fmt.Fprintf(w, "Hello")
 	})
 	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add(_versionHeader, _apiVersion)
 		fmt.Fprintf(w, "OK")
 	})
 	http.HandleFunc("/fail/enable", func(w http.ResponseWriter, r *http.Request) {
 		_failHalfTheTimeLock.Lock()
 		defer _failHalfTheTimeLock.Unlock()
 		_failHalfTheTime = true
+		w.Header().Add(_versionHeader, _apiVersion)
 		fmt.Fprint(w, "Enabled")
 	})
 	http.HandleFunc("/fail/status", func(w http.ResponseWriter, r *http.Request) {
 		_failHalfTheTimeLock.RLock()
 		defer _failHalfTheTimeLock.RUnlock()
+		w.Header().Add(_versionHeader, _apiVersion)
 		fmt.Fprintf(w, "%t", _failHalfTheTime)
 	})
 	fmt.Printf("Serving at port %d\n", _port)

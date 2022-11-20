@@ -1,0 +1,142 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: myapp
+  namespace: default
+spec:
+  replicas: 7
+  selector:
+    matchLabels:
+      app: myapp
+  strategy:
+    canary:
+      # Both services must exist. Otherwise the rollout will enter a
+      # Degraded state
+      canaryService: myapp-canary
+      stableService: myapp
+      trafficRouting:
+        nginx:
+          # This ingress must exist too
+          stableIngress: myapp
+          additionalIngressAnnotations:
+            # This allows us to supply 'X-Canary: iwantsit' HTTP header
+            # to force requests to go to canary pods
+            canary-by-header: X-Canary
+            canary-by-header-value: iwantsit
+      stableMetadata:
+        labels:
+          role: stable
+      # Use ephemeral metadata to differentiate canary pods
+      # https://argoproj.github.io/argo-rollouts/features/ephemeral-metadata/
+      canaryMetadata:
+        labels:
+          role: canary
+      steps:
+        - setWeight: 20
+        - pause: {}
+        - setWeight: 30
+        - pause: {}
+        - setWeight: 50
+        - pause: {}
+        - setWeight: 80
+        - pause: {}
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+        - name: goserver
+          image: localhost:6001/yanhan/goprom-argo-rollouts:0.1
+          ports:
+            - name: web
+              containerPort: 3333
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: web
+            failureThreshold: 3
+            successThreshold: 1
+            periodSeconds: 5
+            timeoutSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp
+  namespace: default
+  labels:
+    # NOTE: labels are necessary on this Service object in order to pass
+    # down these same labels to the k8s `endpoints` object.
+    # This is to allow the ServiceMonitor below to use selector.matchLabels
+    # to select the correct k8s `endpoints` object to scrape Prometheus
+    # metrics
+    app: myapp
+spec:
+  type: ClusterIP
+  selector:
+    app: myapp
+  ports:
+    - name: web
+      port: 80
+      targetPort: web
+---
+# Service for the canary. Other than the name, everything else should
+# be the same as for the stable service
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-canary
+  namespace: default
+  labels:
+    app: myapp
+spec:
+  type: ClusterIP
+  selector:
+    app: myapp
+  ports:
+    - name: web
+      port: 80
+      targetPort: web
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: myapp
+  namespace: default
+spec:
+  endpoints:
+    - followRedirects: true
+      path: /metrics
+      port: web
+  namespaceSelector:
+    matchNames:
+      - default
+  # podTargetLabels transfers labels on k8s pods to the metrics
+  # This allows us to use the `role` label select for metrics from
+  # canary pods (canary pods have role=canary)
+  podTargetLabels:
+    - role
+  selector:
+    matchLabels:
+      app: myapp
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myapp
+  namespace: default
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: nginx.manual
+      http:
+        paths:
+          - backend:
+              service:
+                name: myapp
+                port:
+                  name: web
+            path: /
+            pathType: Prefix

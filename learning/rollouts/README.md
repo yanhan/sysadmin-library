@@ -111,6 +111,81 @@ kdes analysisruns
 After exceeding the failureLimit, a rollback will be done to the original image.
 
 
+## Use with nginx ingress traffic splitting and manual rollout
+
+Install ingress-nginx controller:
+```
+kaf https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.5.1/deploy/static/provider/cloud/deploy.yaml
+kg po -n ingress-nginx
+# wait for the pods to be running
+k wait -n ingress-nginx --for=condition=ready po --selector=app.kubernetes.io/component=controller --timeout=120s
+```
+
+Verify:
+```
+k create deployment demo --image=httpd --port=80
+k expose deployment demo
+k create ingress demo-localhost --class=nginx --rule='demo.localdev.me/*=demo:80'
+kpf -n ingress-nginx svc/ingress-nginx-controller 8080:80
+
+# Run in another terminal, you should see "It works!" in the body
+c -i -H 'Host: demo.localdev.me' 'http://127.0.0.1:8080'
+```
+
+IMPT: Follow the steps in the "Use with Prometheus analysis" section to install kube-prometheus.
+
+Deploy rollout, services, servicemonitor, ingress k8s resources:
+```
+kaf ./nginx-traffic-split.yml
+```
+
+Monitor the rollout:
+```
+k argo rollouts get rollout myapp -w
+```
+
+Port forward to the ingress controller:
+```
+kpf -n ingress-nginx svc/ingress-nginx-controller 8888:80
+```
+
+All requests should go to the v1 pods (see the `Version: v1` response header):
+```
+c -i -H 'Host: nginx.manual' 'http://127.0.0.1:8888/'
+```
+
+Observe that both the stable and canary endpoints for the service consist of all the pods:
+```
+kg ep
+```
+
+Set a new image (NOTE: Ensure the `_apiVersion = "v2"` in the Golang code before you build the image):
+```
+k argo rollouts set image myapp goserver=localhost:6001/yanhan/goprom-argo-rollouts:0.2
+```
+
+Fire a bunch of requests:
+```
+for i in {1..100}; do curl -i -H 'Host: nginx.manual' 'http://127.0.0.1:8888' ; done >o
+```
+
+Check the proportion of responses going to stable vs canary:
+```
+grep v1 o | wc -l
+grep v2 o | wc -l
+```
+
+Observe that the `myapp-canary` endpoints no longer overlap with `myapp`:
+```
+kg ep
+```
+
+Manually promote and repeat above observations, until satisifed:
+```
+k argo rollouts promote myapp
+```
+
+
 ## References
 
 - https://argoproj.github.io/argo-rollouts/installation/
@@ -118,3 +193,5 @@ After exceeding the failureLimit, a rollback will be done to the original image.
 - https://argoproj.github.io/argo-rollouts/features/ephemeral-metadata/
 - https://argoproj.github.io/argo-rollouts/features/analysis/#failure-conditions-and-failure-limit
 - https://argoproj.github.io/argo-rollouts/features/specification/
+- https://kubernetes.github.io/ingress-nginx/deploy/#quick-start
+- https://argoproj.github.io/argo-rollouts/features/traffic-management/nginx/
