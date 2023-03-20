@@ -34,7 +34,17 @@ kubectl label ns default istio-injection=enabled
 kaf samples/bookinfo/platform/kube/bookinfo.yaml
 ```
 
-Wait for the pods in default namespace to be ready. Then verify:
+Wait for the pods in default namespace to be ready:
+```
+k rollout status deploy/details-v1 && \
+k rollout status deploy/ratings-v1 && \
+k rollout status deploy/reviews-v1 && \
+k rollout status deploy/reviews-v2 && \
+k rollout status deploy/reviews-v3 && \
+k rollout status deploy/productpage-v1
+```
+
+Then verify:
 ```
 k exec "$(kg po -l app=ratings -o jsonpath='{.items[0].metadata.name}')" -c ratings -- curl -sS productpage:9080/productpage | grep -o "<title>.*</title>"
 ```
