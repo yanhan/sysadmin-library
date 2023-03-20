@@ -19,7 +19,8 @@ spec:
     spec:
       containers:
         - name: web
-          image: yanhan/go-otlp-xray:v0.2.9
+          image: yanhan/go-otlp-xray:v0.2.12
+          imagePullPolicy: Always
           ports:
             - name: web
               containerPort: 8831

@@ -17,10 +17,10 @@ For more information about the ADOT EKS add-on and how to deploy the ADOT collec
 
 ## Building
 
-Replace the `yanhan/go-otlp-xray:v0.2.9` with your own repo and tag:
+Replace the `yanhan/go-otlp-xray:v0.2.12` with your own repo and tag:
 ```
-docker build -t yanhan/go-otlp-xray:v0.2.9 .
-docker push yanhan/go-otlp-xray:v0.2.9
+docker build -t yanhan/go-otlp-xray:v0.2.12 .
+docker push yanhan/go-otlp-xray:v0.2.12
 ```
 
 There is a base setup in the `base` dir. But you might want to edit the namespace, names, service port, as well as the value of the `OTLP_COLLECTOR_HOST_PORT` environment variable in the Deployment spec.

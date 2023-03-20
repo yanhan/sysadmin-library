@@ -97,7 +97,7 @@ func newResource() *resource.Resource {
 		resource.NewWithAttributes(
 			semconv.SchemaURL,
 			semconv.ServiceNameKey.String("xrayfib"),
-			semconv.ServiceVersionKey.String("v0.2.9"),
+			semconv.ServiceVersionKey.String("v0.2.12"),
 			attribute.String("environment", "demo"),
 		),
 	)
