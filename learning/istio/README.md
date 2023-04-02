@@ -89,7 +89,7 @@ To verify this, refresh the Bookinfo product page a few times on the browser. So
 
 ## Install addons
 
-Such as Kialia
+Such as Kiali
 
 ```
 kaf samples/addons
