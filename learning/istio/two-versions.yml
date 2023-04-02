@@ -1,0 +1,170 @@
+# About:
+# Traffic management setup using Istio that directs to 2 different
+# deployments based on a 'toggle-version' Header.
+# 2 Deployments, 1 Service.
+# 1 Gateway, 1 VirtualService, 1 DestinationRule
+#
+#
+# How to use:
+#
+# kaf ./one-version.yml
+# kn one
+# istio_env_vars
+# c -i -H 'Host: echo.two.svc.cluster.local'  "http://${GATEWAY_URL}/"
+# c -i -H 'Host: echo.two.svc.cluster.local' -H 'toggle-version: v2'  "http://${GATEWAY_URL}/"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: two
+  labels:
+    istio-injection: enabled
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-one
+  namespace: two
+  labels:
+    app: echo
+    version: v2
+    # For some reason, just having the istio-injection label on the
+    # namespace does not work...
+    istio-injection: enabled
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echo
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: echo
+        version: v1
+    spec:
+      containers:
+        - name: echo
+          image: hashicorp/http-echo:alpine
+          args:
+            - -text="echo from echo-one"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-two
+  namespace: two
+  labels:
+    app: echo
+    version: v2
+    istio-injection: enabled
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echo
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: echo
+        version: v2
+    spec:
+      containers:
+        - name: echo
+          image: hashicorp/http-echo:alpine
+          args:
+            - -text="echo from echo-two"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo
+  namespace: two
+  labels:
+    app: echo
+spec:
+  type: NodePort
+  selector:
+    app: echo
+  ports:
+    - name: http
+      port: 8889
+      protocol: TCP
+      targetPort: 5678
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: echo
+  namespace: two
+spec:
+  # Extremely important. We want to select the istio-ingressgateway
+  # pods here. This will be done across all namespaces.
+  # We assume that the istio-ingressgateway deployment on istio-system
+  # namespace have the istio=ingressgateway label
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        # This port is the http2 port on the istio-ingressgateway k8s
+        # Service object.
+        number: 80
+        # The name here can be any valid name
+        name: echo-http
+        protocol: HTTP
+      hosts:
+        - "*"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: echo-route
+  namespace: two
+spec:
+  hosts:
+    - echo.two.svc.cluster.local
+  # Important: gateways must contain the list of Istio Gateway objects.
+  # Here, we list the one we define above
+  gateways:
+    - echo
+  http:
+    # More specific stuff has to be defined on top
+    # Otherwise the catch all (that dont match on headers or anything)
+    # will take precedence
+    - name: echo-two-route
+      match:
+        - headers:
+            toggle-version:
+              exact: v2
+      route:
+        - destination:
+            host: echo.two.svc.cluster.local
+            subset: subset-two
+    # This name can be any valid name
+    - name: echo-one-route
+      route:
+        - destination:
+            # Host has to be in the service registry. k8s Service objects
+            # are automatically included in this registry.
+            host: echo.two.svc.cluster.local
+            # This has to match the subset name of the DestinationRule
+            subset: subset-one
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: echo-destination
+  namespace: two
+spec:
+  host: echo.two.svc.cluster.local
+  subsets:
+    - name: subset-one
+      labels:
+        # Pods with the below label are selected to direct traffic to
+        app: echo
+        version: v1
+    - name: subset-two
+      labels:
+        app: echo
+        version: v2
