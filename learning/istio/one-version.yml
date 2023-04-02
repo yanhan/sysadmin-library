@@ -10,7 +10,7 @@
 # kaf ./one-version.yml
 # kn one
 # istio_env_vars
-# c -i -H 'Host: echo-one.one.svc.cluster.local'  "http://{GATEWAY_URL}/"
+# c -i -H 'Host: echo-one.one.svc.cluster.local'  "http://${GATEWAY_URL}/"
 ---
 apiVersion: v1
 kind: Namespace
