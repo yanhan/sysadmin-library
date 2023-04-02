@@ -1,0 +1,117 @@
+# About:
+# A very simple traffic management setup using Istio.
+# 1 Deployment, 1 Service.
+# We use 1 Gateway, 1 VirtualService, 1 DestinationRule to direct
+# traffic to that 1 deployment.
+#
+#
+# How to use:
+#
+# kaf ./one-version.yml
+# kn one
+# istio_env_vars
+# c -i -H 'Host: echo-one.one.svc.cluster.local'  "http://{GATEWAY_URL}/"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: one
+  labels:
+    istio-injection: enabled
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-one
+  namespace: one
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echo-one
+  template:
+    metadata:
+      labels:
+        app: echo-one
+    spec:
+      containers:
+        - name: echo
+          image: hashicorp/http-echo:alpine
+          args:
+            - -text="echo from echo-one"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-one
+  namespace: one
+  labels:
+    app: echo-one
+spec:
+  type: NodePort
+  selector:
+    app: echo-one
+  ports:
+    - name: http
+      port: 8888
+      protocol: TCP
+      targetPort: 5678
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: echo-gateway
+  namespace: one
+spec:
+  # Extremely important. We want to select the istio-ingressgateway
+  # pods here. This will be done across all namespaces.
+  # We assume that the istio-ingressgateway deployment on istio-system
+  # namespace have the istio=ingressgateway label
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        # This port is the http2 port on the istio-ingressgateway k8s
+        # Service object.
+        number: 80
+        # The name here can be any valid name
+        name: echo-http
+        protocol: HTTP
+      hosts:
+        - "*"
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: echo-route
+  namespace: one
+spec:
+  hosts:
+    - echo-one.one.svc.cluster.local
+  # Important: gateways must contain the list of Istio Gateway objects.
+  # Here, we list the one we define above
+  gateways:
+    - echo-gateway
+  http:
+    # This name can be any valid name
+    - name: echo-one-route
+      route:
+        - destination:
+            # Host has to be in the service registry. k8s Service objects
+            # are automatically included in this registry.
+            host: echo-one.one.svc.cluster.local
+            # This has to match the subset name of the DestinationRule
+            subset: subset-one
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: echo-one-destination
+  namespace: one
+spec:
+  host: echo-one.one.svc.cluster.local
+  subsets:
+    - name: subset-one
+      labels:
+        # Pods with the below label are selected to direct traffic to
+        app: echo-one
